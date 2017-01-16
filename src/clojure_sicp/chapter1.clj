@@ -24,33 +24,35 @@
   [x y]
   (/ (+ x y) 2))
 
-(defn improve
+(defn improve-sq
   [guess n]
   (average guess (/ n guess)))
 
 (defn sqrt [n]
-  (letfn [(help [guess]
-            (let [new (improve guess n)]
+  (letfn [(sqrt-iter [guess]
+            (let [new (improve-sq guess n)]
               (if (good-enough? guess new)
                 new
-                (help new))))]
-    (help 1.0)))
+                (sqrt-iter new))))]
+    (sqrt-iter 1.0)))
 
 ;;; Exercise 1.8
 
+(defn cube
+  [x]
+  (Math/pow x 3))
+
+(defn improve-cube
+  [guess x]
+  (/ (+ (/ x (* guess guess))
+        (* 2 guess))
+     3))
+
 (defn cubert [x]
   (letfn [(cubert-iter [guess x]
-            (letfn [(cube [x]
-                      (Math/pow x 3))
-                    (good-enough? [guess x]
-                      (< (Math/abs (- (cube guess) x)) 0.001))
-                    (improve [guess x]
-                      (/ (+ (/ x (* guess guess))
-                            (* 2 guess))
-                         3))])
-            (if (good-enough? guess x)
+            (if (good-enough? (cube guess) x)
               guess
-              (cubert-iter (improve guess x) x)))]
+              (cubert-iter (improve-cube guess x) x)))]
     (cubert-iter 1.0 x)))
 
 ;;; Exercise 1.11
