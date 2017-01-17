@@ -7,7 +7,8 @@
 
 ;;; Exercise 1.3
 
-(defn sum-square-bigger [a b c]
+(defn sum-square-bigger
+  [a b c]
   (letfn [(square [n] (* n n))]
     (- (apply + (map square [a b c]))
        (square (min a b c)))))
@@ -72,7 +73,8 @@
 
 ;;; Exercise 1.12
 
-(defn pascal [row col]
+(defn pascal
+  [row col]
   (cond (= row 0) (if (= col 0) 1 (throw (Exception. "Out of range")))
         (= col 0) 1
         (= col row) 1
@@ -90,7 +92,8 @@
 
 (defn square [n] (* n n))
 
-(defn fast-expt-iter [b n]
+(defn fast-expt-iter
+  [b n]
   (letfn [(help [a b n]
             (cond (= n 0) a
                   (even? n) (help a (square b) (/ n 2))
@@ -103,12 +106,16 @@
 
 ;;; Exercise 1.17
 
-(defn double-n [n] (* 2 n))
+(defn double-n
+  [n]
+  (* 2 n))
 
-(defn halve [n]
+(defn halve
+  [n]
   (when (even? n) (/ n 2)))
 
-(defn fast-mult-rec [a b]
+(defn fast-mult-rec
+  [a b]
   (cond (= b 1) a
         (= a 1) b
         (even? b) (double-n (fast-mult-rec a (halve b)))
@@ -116,7 +123,8 @@
 
 ;;; Exercise 1.18
 
-(defn fast-mult-iter [a b]
+(defn fast-mult-iter
+  [a b]
   (letfn [(help [a b c]
             (cond (= b 0) c
                   (even? b) (help (double-n a) (halve b) c)
@@ -125,7 +133,8 @@
 
 ;;; Exercise 1.19
 
-(defn fib [n]
+(defn fib
+  [n]
   (letfn [(fib-iter [a b p q counter]
             (cond (= counter 0) b
                   (even? counter) (fib-iter a b
@@ -141,22 +150,26 @@
 
 ;;; Exercise 1.21 + 1.22 + 1.24
 
-(defn expmod [base exp m]
+(defn expmod
+  [base exp m]
   (cond (= exp 0) 1
         (even? exp) (mod (square (expmod base (/ exp 2) m))
                          m)
         :else (mod (* base (expmod base (dec exp) m))
                    m)))
 
-(defn fermat-test [n]
+(defn fermat-test
+  [n]
   (let [rand (int (inc (rand (dec n))))]
     (= (expmod rand n n) rand)))
 
-(defn fast-prime? [n times]
+(defn fast-prime?
+  [n times]
   (every? identity
           (map fermat-test (take times (repeat n)))))
 
-(defn search-for-primes [from to]
+(defn search-for-primes
+  [from to]
   (let [table (map #(vector % (fast-prime? % 20)) (range from to))]
     (map first (filter second table))))
 
@@ -169,7 +182,8 @@
 
 ;;; Exercise 1.23
 
-(defn smallest-divisor [n]
+(defn smallest-divisor
+  [n]
   (letfn [(find-divisor [test]
             (letfn [(next-test [n]
                       (if (= n 2) 3
@@ -179,19 +193,22 @@
                     :else (find-divisor (next-test test)))))]
     (find-divisor 2)))
 
-(defn prime? [n]
+(defn prime?
+  [n]
   (= n (smallest-divisor n)))
 
 ;;; Exercise 1.27
 
-(defn test-ferma? [n]
+(defn test-ferma?
+  [n]
   (and (not (prime? n))
        (every? #(= (expmod % n n) %)
                (range 1 n))))
 
 ;; Exercise 1.28
 
-(defn mill-rabin-expmod [base exp m]
+(defn mill-rabin-expmod
+  [base exp m]
   (cond (= exp 0) 1
         (even? exp) (let [itr (mill-rabin-expmod base (/ exp 2) m)
                           sqr (square itr)]
@@ -203,11 +220,13 @@
         :else (mod (* base (mill-rabin-expmod base (dec exp) m))
                    m)))
 
-(defn mr-fermat-test [n]
+(defn mr-fermat-test
+  [n]
   (let [rand (int (inc (rand (dec n))))]
     (= (mill-rabin-expmod rand (dec n) n) (mod 1 n))))
 
-(defn mr-fast-prime? [n times]
+(defn mr-fast-prime?
+  [n times]
   (every? mr-fermat-test
           (take times (repeat n))))
 
@@ -217,13 +236,15 @@
 
 ;;; Exercise 1.29
 
-(defn sum [term a next b]
+(defn sum
+  [term a next b]
   (if (> a b)
     0
     (+ (term a)
        (sum term (next a) next b))))
 
-(defn integral [f a b n]
+(defn integral
+  [f a b n]
   (let [h (/ (- b a) n)]
     (letfn [(term [k]
               (* (f (+ a (* k h)))
@@ -234,7 +255,8 @@
 
 ;;; Exercise 1.30
 
-(defn sum-it [term a next b]
+(defn sum-it
+  [term a next b]
   (loop [a a
          acc 0]
     (if (> a b) acc
@@ -243,61 +265,72 @@
 
 ;;; Exercise 1.31
 
-(defn product-iter [term a next b]
+(defn product-iter
+  [term a next b]
   (if (> a b)
     1
     (* (term a)
        (product-iter term (next a) next b))))
 
-(defn product-recur [term a next b]
+(defn product-recur
+  [term a next b]
   (loop [a a
          acc 1]
     (if (> a b) acc
         (recur (next a) (* acc (term a))))))
 
-(defn product [term a next b]
+(defn product
+  [term a next b]
   (reduce * 1
           (map term (take-while #(<= % b)
                                 (iterate next a)))))
 
 ;;; Exercise 1.32
 
-(defn accumulate-recur [combiner null-value term a next b]
+(defn accumulate-recur
+  [combiner null-value term a next b]
   (loop [a a
          acc null-value]
     (if (> a b) acc
         (recur (next a) (combiner acc (term a))))))
 
-(defn accumulate-iter [combiner null-value term a next b]
+(defn accumulate-iter
+  [combiner null-value term a next b]
   (if (> a b) null-value
       (combiner (term a)
                 (accumulate-iter combiner null-value term (next a) next b))))
 
-(defn sum [term a next b]
-  (accumulate + 0 term a next b))
+(defn sum
+  [term a next b]
+  (accumulate-iter + 0 term a next b))
 
-(defn product [term a next b]
-  (accumulate * 1 term a next b))
+(defn product
+  [term a next b]
+  (accumulate-recur * 1 term a next b))
 
 ;;; Exercise 1.33
 
-(defn filtered-accumulate [pred combiner null-value term a next b]
+(defn filtered-accumulate
+  [pred combiner null-value term a next b]
   (loop [a a
          acc null-value]
     (if (> a b) acc
         (recur (next a)
                (if (pred a) (combiner acc (term a)) acc)))))
 
-(defn sum-squares-primes [a b]
+(defn sum-squares-primes
+  [a b]
   (filtered-accumulate prime? + 0 square a inc b))
 
-(defn product-prime-n [n]
+(defn product-prime-n
+  [n]
   (filtered-accumulate #(= (.gcd % n) 1)
               * 0 identity 1 inc (dec n)))
 
 ;;; Exercise 1.35
 
-(defn fixed-point [f first-guess]
+(defn fixed-point
+  [f first-guess]
   (letfn [(close-enough? [v1 v2]
             (< (Math/abs (- v1 v2)) 0.000001))
           (try-it [guess]
@@ -309,11 +342,38 @@
 
 (def phi (fixed-point #(+ 1 (/ 1 %)) 1.0))
 
-;;; Exercise 1.36 -- TO DO
+;;; Exercise 1.36
+
+(defn fixed-point
+  [f first-guess]
+  (letfn [(close-enough? [v1 v2]
+            (< (Math/abs (- v1 v2)) 0.000001))
+          (try-it [guess]
+            (println "Look at this ->> " guess)
+            (let [next (f guess)]
+              (if (close-enough? guess next)
+                next
+                (try-it next))))]
+    (try-it first-guess)))
+
+(defn no-dampening
+  [guess]
+  (println "No dampening")
+  (fixed-point #(/ (Math/log 1000)
+                   (Math/log %)) guess))
+
+(defn dampening
+  [guess]
+  (println "With dampening")
+  (fixed-point #(/ (+ %
+                      (/ (Math/log 1000)
+                         (Math/log %)))
+                   2) guess))
 
 ;;; Exercise 1.37
 
-(defn cont-frac [n d k]
+(defn cont-frac
+  [n d k]
   (letfn [(help [i]
             (if (= i k) (/ (n i) (d i))
                 (/ (n i)
@@ -321,7 +381,8 @@
                       (help (inc i))))))]
     (help 1)))
 
-(defn cont-frac [n d k]
+(defn cont-frac
+  [n d k]
   (loop [k k
          acc 0]
     (if (< k 1) acc
@@ -329,7 +390,8 @@
 
 ;;; Exercise 1.38
 
-(defn euler [i]
+(defn euler
+  [i]
   (let [i (dec i)
         idx (mod i 3)]
     (cond (= idx 0) 1
@@ -340,26 +402,31 @@
 
 ;;; Exercise 1.39
 
-(defn tan-cf [x k]
+(defn tan-cf
+  [x k]
   (cont-frac #(if (> % 1) (* -1 (square x)) x)
              #(- (* % 2) 1)
              k))
 
 ;;; Exercise 1.40
 
-(defn deriv [g]
+(defn deriv
+  [g]
   (fn [x]
     (/ (- (g (+ x 0.00001)) (g x))
        0.00001)))
 
-(defn newton-transform [g]
+(defn newton-transform
+  [g]
   (fn [x]
     (- x (/ (g x) ((deriv g) x)))))
 
-(defn newtons-method [g guess]
+(defn newtons-method
+  [g guess]
   (fixed-point (newton-transform g) guess))
 
-(defn cubic [a b c]
+(defn cubic
+  [a b c]
   (fn [x]
     (+ (* x x x)
        (* a x x)
@@ -371,7 +438,8 @@
 
 ;;; Exercise 1.41
 
-(defn double-f [f]
+(defn double-f
+  [f]
   (fn [x]
     (f (f x))))
 
@@ -379,7 +447,8 @@
 
 ;;; Exercise 1.42
 
-(defn compose [f g]
+(defn compose
+  [f g]
   (fn [x]
     (f (g x))))
 
@@ -387,34 +456,63 @@
 
 ;;; Exercise 1.43
 
-(defn repeated [f n]
+(defn repeated
+  [f n]
   (if (= n 1) f
       (compose f (repeated f (dec n)))))
 
-(defn repeated [f n]
+(defn repeated
+  [f n]
   (fn [x]
     (last (take (inc n) (iterate f x)))))
 
 ((repeated square 2) 5)
 
-;;; Exercise 1.44 -- TO DO
+;;; Exercise 1.44
 
-;;; Exercise 1.45 -- TO DO
+(defn smooth
+  [f]
+  (fn [x]
+    (/ (+ (f (- x 0.00001))
+          (f x)
+          (f (+ x 0.00001)))
+       3)))
+
+(defn n-fold-smooth
+  [f n]
+  (repeated (smooth f) n))
+
+;;; Exercise 1.45
+
+(defn average-damp
+  [f]
+  (fn [x] (average x (f x))))
+
+(defn nth-root
+  [n x]
+  (fixed-point ((repeated average-damp
+                          (Math/ceil (/ n 2.0)))
+                (fn [y] (/ x (Math/pow y (dec n)))))
+               1.0))
 
 ;;; Exercise 1.46
 
-(defn iterative-improve [good-enough? improve]
+(defn iterative-improve
+  [good-enough? improve]
   (fn [guess]
-    (loop [guess guess]
-      (if (good-enough? guess) guess
-          (recur (improve guess))))))
+    (loop [previous-guess guess
+           current-guess (improve guess)]
+      (if (good-enough? previous-guess) current-guess
+          (recur current-guess (improve current-guess))))))
 
-(defn sqrt [x]
+(defn sqrt
+  [x]
   ((iterative-improve #(< (Math/abs (- (square %) x)) 0.0001)
                       #(/ (+ % (/ x %)) 2))
    x))
 
-(defn fixed-point [f guess]
+(defn fixed-point
+  [f guess]
   ((iterative-improve #(< (Math/abs (- (f %) %)) 0.0001)
                       #(f %))
    guess))
