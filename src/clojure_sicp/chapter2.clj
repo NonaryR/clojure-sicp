@@ -546,19 +546,19 @@
 
 (defn safe?
   [k positions]
-  (def candidate (first positions))
-  (defn safe-iter [top bot remain]
-    (cond (empty? remain) true
-          (or (= (first remain) candidate)
-              (= (first remain) top)
-              (= (first remain) bot)) false
-          :else
-          (safe-iter (- top 1) (+ bot 1) (rest remain))))
-  (safe-iter (- candidate 1) (+ candidate 1) (rest positions)))
+  (let [candidate (first positions)]
+    (letfn [(safe-iter [top bot remain]
+              (cond (empty? remain) true
+                    (or (= (first remain) candidate)
+                        (= (first remain) top)
+                        (= (first remain) bot)) false
+                    :else
+                    (safe-iter (- top 1) (+ bot 1) (rest remain))))]
+      (safe-iter (- candidate 1) (+ candidate 1) (rest positions)))))
 
 (defn queens
   [board-size]
-  (defn queen-cols [k]
+  (letfn [(queen-cols [k]
     (if (= k 0)
       (list empty-board)
       (filter (fn [positions] (safe? k positions))
@@ -567,8 +567,8 @@
                  (map (fn [new-row]
                         (adjoin-position new-row k rest-of-queens))
                       (range 1 (inc board-size))))
-               (queen-cols (dec k))))))
-  (queen-cols board-size))
+               (queen-cols (dec k))))))]
+  (queen-cols board-size)))
 
 ;;; Exercise 2.44
 
@@ -587,9 +587,6 @@
     (let [smaller (up-split painter (- n 1))]
       (below painter (beside smaller smaller)))))
 
-(def right-split (split beside below))
-(def up-split (split below beside))
-
 ;;; Exercise 2.45
 
 (defn split
@@ -598,6 +595,9 @@
     (if (= n 0)
       (let [smaller (ret painter (dec n))]
         (a painter (b smaller smaller))))))
+
+(def right-split (split beside below))
+(def up-split (split below beside))
 
 ;;; Exercise 2.46
 
@@ -813,6 +813,66 @@
     (and (coll? a) (coll? b) (= (first a) (first b))) (equal? (rest a) (rest b))
     :else false))
 
+;; Exercise 2.55
+
+(defn variable?
+  [x]
+  (symbol? x))
+
+(defn same-variable?
+  [v1 v2]
+  (and (variable? v1) (variable? v2) (= v1 v2)))
+
+(defn make-sum
+  [a1 a2]
+  (cond (= a1 0) a2
+        (= a2 0) a1
+        (and (number? a1) (number? a2)) (+ a1 a2)
+        :else (list '+ a1 a2)))
+
+(defn make-product
+  [m1 m2]
+  (cond (or (= m1 0) (= m2 0)) 0
+        (= m1 1) m2
+        (= m2 1) m1
+        (and (number? m1) (number? m2)) (* m1 m2)
+        :else (list '* m1 m2)))
+
+(defn sum? [x]
+  (and (coll? x) (= (first x) '+)))
+
+(defn addend
+  [s]
+  (second s))
+
+(defn augend
+  [s]
+  (second (rest s)))
+
+(defn product? [x]
+  (and (coll? x) (= (first x) '*)))
+
+(defn multiplier
+  [p]
+  (second p))
+
+(defn multiplicand
+  [p]
+  (second (rest p)))
+
+(defn deriv [exp var]
+  (cond (number? exp) 0
+        (variable? exp) (if (same-variable? exp var) 1 0)
+        (sum? exp) (make-sum (deriv (addend exp) var)
+                             (deriv (augend exp) var))
+        (product? exp) (make-sum
+                        (make-product (multiplier exp)
+                                      (deriv (multiplicand exp) var))
+                        (make-product (deriv (multiplier exp) var)
+                                      (multiplicand exp)))
+:else (throw (Exception. "unknown expression type -- DERIV" exp))))
+
+
 ;;; Exercise 2.56
 
 (defn exponentiation?
@@ -979,10 +1039,6 @@
 
 ;;; Exercise 2.64
 
-(defn list->tree
-  [elements]
-  (first (partial-tree elements (count elements))))
-
 (defn partial-tree
   [elts n]
   (if (= n 0) ([[] elts])
@@ -996,6 +1052,10 @@
             right-tree (first right-result)
             remaining-elts (second right-result)]
         [(make-tree this-entry left-tree right-tree) remaining-elts])))
+
+(defn list->tree
+  [elements]
+  (first (partial-tree elements (count elements))))
 
 ;;; Exercise 2.66
 
@@ -1229,7 +1289,33 @@
      (= op 'angle) a
      :else (throw (RuntimeException. (str "Unknown op - MAKE-FROM-REAL-IMAG" op))))))
 
-;;; 2.77
+;;; Exercise 2.77
+
+(def proc-table (atom {}))
+
+(defn pt-get
+  [op type]
+  (@proc-table [op type]))
+
+(defn pt-put
+  [op type item]
+  (swap! proc-table #(assoc % [op type] item)))
+
+(defn attach-tag
+  [tag content]
+  (if (coll? content) (cons tag content) content))
+
+(defn type-tag
+  [datum]
+  (cond (number? datum) datum
+        (coll? datum) (first datum)
+        :else (throw (RuntimeException. (str "Wrong datum -- TYPE-TAG " datum)))))
+
+(defn contents
+  [datum]
+  (cond (number? datum) datum
+        (coll? datum) (rest datum)
+        :else (throw (RuntimeException. (str "Wrong datum -- CONTENGS " datum)))))
 
 (defn install-rectangular-package
   []
@@ -1415,7 +1501,7 @@
   [r a]
   ((pt-get 'make-from-mag-ang 'complex) r a))
 
-(def z (make-complex-from-mag-ang 8 6))
+;; (def z (make-complex-from-mag-ang 8 6))
 
 ;; Fails
 ;;(magnitude z)
