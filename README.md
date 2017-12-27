@@ -1,6 +1,6 @@
 # clojure-sicp
 
-Решения заданий из [самой лучшей книги по программированию] (https://mitpress.mit.edu/sicp/full-text/book/book.html) на кложе :crown: 
+Решения заданий из [самой лучшей книги по программированию](https://mitpress.mit.edu/sicp/full-text/book/book.html) на кложе :crown: 
 
 :collision: :tada: :rocket: 
 
